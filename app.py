@@ -245,6 +245,9 @@ def generate_word_doc_bytes(metadata, self_qa, peer_grouped):
                 f_p = doc.add_paragraph(style='List Bullet')
                 f_p.paragraph_format.left_indent = Inches(0.25)
                 f_p.paragraph_format.space_after = Pt(3)
+                feed_run = f_p.add_run(str(item))
+                feed_run.font.size = Pt(10)
+                feed_run.font.color.rgb = RGBColor(51, 65, 85)
 
     # ==================== PART 3: MANAGER EVALUATION (NEW PAGE) ====================
     doc.add_page_break()
@@ -368,7 +371,7 @@ if self_file and peer_file:
 
         for c in peer_cols:
             c_low = c.lower()
-            if any(k in c_low for k in ['colleague', 'reviewing', 'employee you are reviewing']) and not target_col:
+            if any(k in c_low for k in ['colleague', 'reviewing', 'employee you are reviewing', 'nominee', 'peer name', 'candidate', 'person being reviewed', 'select the employee']) and not target_col:
                 target_col = c
             elif 'reviewer' in c_low and 'name' in c_low and not reviewer_name_col:
                 reviewer_name_col = c
@@ -381,7 +384,14 @@ if self_file and peer_file:
 
         if not target_col:
             for c in peer_cols:
-                if 'colleague' in c.lower() or 'name' in c.lower():
+                c_low = c.lower()
+                if ('colleague' in c_low or 'nominee' in c_low or 'reviewing' in c_low) and 'reviewer' not in c_low:
+                    target_col = c
+                    break
+        if not target_col:
+            for c in peer_cols:
+                c_low = c.lower()
+                if 'name' in c_low and 'reviewer' not in c_low:
                     target_col = c
                     break
         if not target_col and len(peer_cols) > 3:
