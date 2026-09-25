@@ -264,20 +264,25 @@ def combine_original_peer_feedback(responses):
         if not resp or not str(resp).strip():
             continue
         text = str(resp).strip()
-        # Split by explicit newlines
         raw_lines = [l.strip() for l in text.split('\n') if l.strip()]
         for line in raw_lines:
-            # Strip leading bullet/numbering e.g. "1. ", "• ", "- "
-            clean_item = re.sub(r'^\s*(?:\d+[\.\)]|[•\-\*])\s*', '', line).strip()
-            # Strip trailing markdown asterisks if any
-            clean_item = re.sub(r'[\*\#]+$', '', clean_item).strip()
-            if clean_item:
-                norm = clean_item.lower()
+            # Strip standard list markers: 1., 1), (1), a., A), -, *, •, >, etc.
+            clean_item = re.sub(r'^\s*(?:\(?\d+[\.\:\)]|\(?[a-zA-Z][\.\)]|[•\-\*\>–—])\s*', '', line).strip()
+            # Clean outer markdown formatting or hashtags
+            clean_item = re.sub(r'^[\*\#\_]+\s*', '', clean_item).strip()
+            clean_item = re.sub(r'[\*\#\_]+$', '', clean_item).strip()
+            # Clean trailing semicolons/commas
+            clean_item = re.sub(r'[\;\,]+$', '', clean_item).strip()
+
+            if clean_item and len(clean_item) > 1:
+                # Capitalize first character for clean presentation
+                clean_item = clean_item[0].upper() + clean_item[1:]
+                norm = clean_item.lower().rstrip('. ')
                 if norm not in seen:
                     seen.add(norm)
                     combined_points.append(clean_item)
 
-    return combined_points if combined_points else responses
+    return combined_points if combined_points else [str(r).strip() for r in responses if str(r).strip()]
 
 
 def group_peer_responses_question_wise(peer_submissions):
@@ -455,13 +460,15 @@ def create_word_doc(metadata, self_qa, peer_grouped, output_filepath):
             # Combine original peer points under this question
             combined_items = combine_original_peer_feedback(raw_responses)
 
-            for item in combined_items:
+            for item_idx, item in enumerate(combined_items):
                 f_p = doc.add_paragraph(style='List Bullet')
-                f_p.paragraph_format.left_indent = Inches(0.25)
-                f_p.paragraph_format.space_after = Pt(3)
+                f_p.paragraph_format.space_before = Pt(0)
+                f_p.paragraph_format.space_after = Pt(7) if item_idx == len(combined_items) - 1 else Pt(3)
+                f_p.paragraph_format.line_spacing = 1.15
                 
-                feed_run = f_p.add_run(item)
-                feed_run.font.size = Pt(10)
+                feed_run = f_p.add_run(str(item))
+                feed_run.font.name = 'Calibri'
+                feed_run.font.size = Pt(10.5)
                 feed_run.font.color.rgb = RGBColor(51, 65, 85)
 
     # ==================== PART 3: MANAGER EVALUATION (NEW PAGE) ====================
