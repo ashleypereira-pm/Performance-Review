@@ -1,0 +1,48 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C environments and virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Sensitive Google Credentials & Tokens
+credentials.json
+token.json
+service_account*.json
+*.pem
+*.key
+.env
+.env.*
+
+# Generated Documents & Data Files
+*.docx
+*.zip
+compiled_reviews/
+data/
+*.csv
+*.xlsx
+*.xls
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor configs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Snowflake CLI local cache
+.snowflake/
